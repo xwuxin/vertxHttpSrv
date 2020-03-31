@@ -5,6 +5,11 @@ import com.xniax.handler.VLogicHandler;
 
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * 范例handler
+ * @author wangyucheng
+ *
+ */
 public class NewsHandler implements VLogicHandler{
     public JSONObject list(RoutingContext rc) {
         JSONObject ret = new JSONObject();

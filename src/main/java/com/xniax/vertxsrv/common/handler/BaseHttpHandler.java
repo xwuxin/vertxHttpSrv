@@ -1,7 +1,9 @@
-package com.xniax.vertxsrv.handler;
+package com.xniax.vertxsrv.common.handler;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -13,7 +15,12 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * @author wangyucheng<2751072@qq.com>
+ */
 public class BaseHttpHandler implements Handler<RoutingContext> {
+
+    private static Logger logger = LoggerFactory.getLogger(BaseHttpHandler.class);
 
     public static String getContr(HttpServerRequest req) {
         String c = req.getParam("c");
@@ -37,27 +44,20 @@ public class BaseHttpHandler implements Handler<RoutingContext> {
         String m = getAction(event.request());
         HttpServerResponse res = event.response();
         String handlerClass = String.format("com.xniax.vertxsrv.handler.%sHandler", c);
-        JSONObject ret = new JSONObject();
+        JSONObject ret = null;
         try {
             Class<?> clz = Class.forName(handlerClass);
             VLogicHandler handler = (VLogicHandler) clz.newInstance();
             Method method = clz.getMethod(m, RoutingContext.class);
             ret = (JSONObject) method.invoke(handler, event);
-        } catch (ClassNotFoundException e) {
-            res.end("error controller :" + c);
-        } catch (InstantiationException e) {
-            res.end("error controller :" + e.getMessage());
-        } catch (IllegalAccessException e) {
-            res.end("error controller :" + e.getMessage());
-        } catch (NoSuchMethodException e) {
-            res.end("error method :" + e.getMessage());
-        } catch (SecurityException e) {
-            res.end("error method :" + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            res.end("error method :" + e.getMessage());
-        } catch (InvocationTargetException e) {
-            res.end("error method :" + e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } catch (Throwable e) {
+            logger.error(e.getMessage(), e);
         }
-        res.end(JSON.toJSONString(ret),"UTF-8");
+        if (null == ret) {
+            ret = new JSONObject();
+        }
+        res.end(JSON.toJSONString(ret), "UTF-8");
     }
 }

@@ -1,21 +1,34 @@
 package com.xniax.vertxsrv.common;
 
-import com.xniax.vertxsrv.handler.BaseHttpHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.xniax.vertxsrv.common.handler.BaseHttpHandler;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 
+/**
+ * http server 启动入口类
+ * 
+ * @author wangyucheng<2751072@qq.com>
+ */
 public class VertxSrvApp extends AbstractVerticle {
 
+    private static Logger logger = LoggerFactory.getLogger(VertxSrvApp.class);
+
     public static void main(String[] args) {
-        Vertx.vertx().deployVerticle(new VertxSrvApp());
+        VertxSrvApp app = new VertxSrvApp();
+        Vertx.vertx().deployVerticle(app);
+        app.shutHook();
     }
 
     @Override
     public void start() {
         try {
+            initLogger();
             // 创建HttpServer
             HttpServer server = vertx.createHttpServer();
             // 创建路由对象
@@ -26,14 +39,45 @@ public class VertxSrvApp extends AbstractVerticle {
             // 把请求交给路由处理
             server.requestHandler(router);
             server.listen(8888);
+            logger.info("start server ok!....");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.info(e.getMessage(), e);
+            System.exit(1);
         }
     }
 
-    @Override
-    public void stop() throws Exception {
-        super.stop();
+    private static void initLogger() {
+        if (null == System.getProperty("vertxsrv.home")) {
+            System.setProperty("vertxsrv.home", System.getProperty("user.dir"));
+        }
+        String configFileStr = System.getProperty("vertxsrv.home") + "/config/logback.xml";
+        if (System.getProperty("vertxsrv.config") != null) {
+            configFileStr = System.getProperty("server.config") + "/logback.xml";
+        }
+        if (System.getProperty("log.home") != null) {
+            System.getProperties().setProperty("logging.path", System.getProperty("log.home"));
+        }
+        System.getProperties().setProperty("logback.configurationFile", configFileStr);
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            LoggerFactory.getLogger(VertxSrvApp.class)
+                    .error("Uncaught Exception in thread '" + t.getName() + "'", e);
+            LoggerFactory.getLogger(VertxSrvApp.class).error(e.getMessage(), e);
+        });
     }
 
+    @Override
+    public void stop() {
+        try {
+            super.stop();
+        } catch (Exception e) {
+            logger.info(e.getMessage(), e);
+        }
+        logger.info("stop server ok!");
+    }
+
+    public void shutHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            this.stop();
+        }));
+    }
 }
