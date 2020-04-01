@@ -3,6 +3,7 @@ package com.xniax.vertxsrv.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.xniax.common.algorithm.SnowFlakeIns;
 import com.xniax.vertxsrv.common.handler.BaseHttpHandler;
 
 import io.vertx.core.AbstractVerticle;
@@ -29,6 +30,7 @@ public class VertxSrvApp extends AbstractVerticle {
     public void start() {
         try {
             initLogger();
+            SnowFlakeIns.init(30, 20);
             // 创建HttpServer
             HttpServer server = vertx.createHttpServer();
             // 创建路由对象
@@ -39,6 +41,7 @@ public class VertxSrvApp extends AbstractVerticle {
             // 把请求交给路由处理
             server.requestHandler(router);
             server.listen(8888);
+            
             logger.info("start server ok!....");
         } catch (Exception e) {
             logger.info(e.getMessage(), e);
