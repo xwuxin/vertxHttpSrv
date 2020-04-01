@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.xniax.common.algorithm.SnowFlakeIns;
 import com.xniax.vertxsrv.common.handler.BaseHttpHandler;
 
+import ch.qos.logback.classic.util.ContextInitializer;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -18,7 +19,10 @@ import io.vertx.ext.web.Router;
  */
 public class VertxSrvApp extends AbstractVerticle {
 
-    private static Logger logger = LoggerFactory.getLogger(VertxSrvApp.class);
+    static {
+        initLogger();
+    }
+    private static Logger logger;
 
     public static void main(String[] args) {
         VertxSrvApp app = new VertxSrvApp();
@@ -29,7 +33,6 @@ public class VertxSrvApp extends AbstractVerticle {
     @Override
     public void start() {
         try {
-            initLogger();
             SnowFlakeIns.init(30, 20);
             // 创建HttpServer
             HttpServer server = vertx.createHttpServer();
@@ -41,7 +44,7 @@ public class VertxSrvApp extends AbstractVerticle {
             // 把请求交给路由处理
             server.requestHandler(router);
             server.listen(8888);
-            
+
             logger.info("start server ok!....");
         } catch (Exception e) {
             logger.info(e.getMessage(), e);
@@ -55,17 +58,21 @@ public class VertxSrvApp extends AbstractVerticle {
         }
         String configFileStr = System.getProperty("vertxsrv.home") + "/config/logback.xml";
         if (System.getProperty("vertxsrv.config") != null) {
-            configFileStr = System.getProperty("server.config") + "/logback.xml";
+            configFileStr = System.getProperty("vertxsrv.config") + "/logback.xml";
         }
+        System.getProperties().setProperty("log.home", "./");
+
         if (System.getProperty("log.home") != null) {
             System.getProperties().setProperty("logging.path", System.getProperty("log.home"));
         }
         System.getProperties().setProperty("logback.configurationFile", configFileStr);
+        System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, configFileStr);
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             LoggerFactory.getLogger(VertxSrvApp.class)
                     .error("Uncaught Exception in thread '" + t.getName() + "'", e);
             LoggerFactory.getLogger(VertxSrvApp.class).error(e.getMessage(), e);
         });
+        logger = LoggerFactory.getLogger(VertxSrvApp.class);
     }
 
     @Override
