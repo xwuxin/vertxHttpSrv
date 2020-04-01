@@ -59,11 +59,13 @@ public class SnowFlake {
     public SnowFlake(long datacenterId, long machineId) {
         if (datacenterId > MAX_DATACENTER_NUM || datacenterId < 0) {
             throw new IllegalArgumentException(
-                    "datacenterId can't be greater than MAX_DATACENTER_NUM or less than 0"+MAX_DATACENTER_NUM);
+                    "datacenterId can't be greater than MAX_DATACENTER_NUM or less than 0"
+                            + MAX_DATACENTER_NUM);
         }
         if (machineId > MAX_MACHINE_NUM || machineId < 0) {
             throw new IllegalArgumentException(
-                    "machineId can't be greater than MAX_MACHINE_NUM or less than 0"+MAX_MACHINE_NUM);
+                    "machineId can't be greater than MAX_MACHINE_NUM or less than 0"
+                            + MAX_MACHINE_NUM);
         }
         this.datacenterId = datacenterId;
         this.machineId = machineId;
@@ -95,6 +97,7 @@ public class SnowFlake {
 
         lastStmp = currStmp;
 
+        //或运算，每个数左移后都转为二进制，然后从高位开始比较，两个数只要有一个为1则为1，否则就为0。
         return (currStmp - START_STMP) << TIMESTMP_LEFT //时间戳部分
                 | datacenterId << DATACENTER_LEFT //数据中心部分
                 | machineId << MACHINE_LEFT //机器标识部分
@@ -111,6 +114,11 @@ public class SnowFlake {
 
     private long getNewstmp() {
         return System.currentTimeMillis();
+    }
+
+    public static void main(String[] args) {
+        SnowFlake snowFlake = new SnowFlake(2, 3);
+        System.out.println(snowFlake.nextId());
     }
 
 }
