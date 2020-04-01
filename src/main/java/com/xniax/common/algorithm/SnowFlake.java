@@ -2,7 +2,7 @@ package com.xniax.common.algorithm;
 
 /**
  * twitter的snowflake算法
- * 协议格式： 0 - 41位时间戳 - 5位数据中心标识 - 5位机器标识 - 12位序列号
+ * 64位二进制协议格式： 0 - 41位时间戳 - 5位数据中心标识 - 5位机器标识 - 12位序列号
  * 
  * @author wangyucheng
  */
@@ -59,13 +59,11 @@ public class SnowFlake {
     public SnowFlake(long datacenterId, long machineId) {
         if (datacenterId > MAX_DATACENTER_NUM || datacenterId < 0) {
             throw new IllegalArgumentException(
-                    "datacenterId can't be greater than MAX_DATACENTER_NUM or less than 0"
-                            + MAX_DATACENTER_NUM);
+                    "datacenterId can't be greater than MAX_DATACENTER_NUM or less than 0");
         }
         if (machineId > MAX_MACHINE_NUM || machineId < 0) {
             throw new IllegalArgumentException(
-                    "machineId can't be greater than MAX_MACHINE_NUM or less than 0"
-                            + MAX_MACHINE_NUM);
+                    "machineId can't be greater than MAX_MACHINE_NUM or less than 0");
         }
         this.datacenterId = datacenterId;
         this.machineId = machineId;
@@ -104,6 +102,12 @@ public class SnowFlake {
                 | sequence; //序列号部分
     }
 
+    /**
+     * 一直取，直到取到当前毫秒时间戳比最后一次lastStmp的毫秒时间戳要大，然后返回
+     * 
+     * @author wangyucheng
+     * @return
+     */
     private long getNextMill() {
         long mill = getNewstmp();
         while (mill <= lastStmp) {
