@@ -28,7 +28,6 @@ public class IndexHandler implements VLogicHandler {
     public JSONObject snowflake(RoutingContext rc) {
         JSONObject ret = new JSONObject();
         ret.put("id", SnowFlakeIns.getSnowFlake().nextId());
-        logger.info("id:"+ret.getString("id"));
         return ret;
     }
 }
