@@ -31,7 +31,7 @@ public class IndexHandler implements VLogicHandler {
             ret.put("id", SnowFlakeIns.getSnowFlake().nextId());
             //logger.info("id:{}", ret.getString("id"));
         } catch (Exception e) {
-            logger.info(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             ret.put("error","create id error");
         }
 
