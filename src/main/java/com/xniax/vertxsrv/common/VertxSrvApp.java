@@ -120,6 +120,9 @@ public class VertxSrvApp extends AbstractVerticle {
 
         final int port = Integer.valueOf(pro.getProperty("vertxsrv.port"));
         RuntimeCfg.port = port;
+
+        final long startstamp = Long.valueOf(pro.getProperty("vertxsrv.startstamp"));
+        RuntimeCfg.startstamp = startstamp;
     }
 
     @Override

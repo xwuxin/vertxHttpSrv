@@ -1,7 +1,6 @@
 package com.xniax.common.algorithm;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.xniax.vertxsrv.common.RuntimeCfg;
 
 /**
  * twitter的snowflake算法
@@ -10,14 +9,6 @@ import org.slf4j.LoggerFactory;
  * @author wangyucheng
  */
 public class SnowFlake {
-
-    private static Logger logger = LoggerFactory.getLogger(SnowFlake.class);
-
-    /**
-     * 起始的时间戳，可以修改为服务第一次启动的时间
-     * 一旦服务已经开始使用，起始时间戳就不应该改变
-     */
-    private final static long START_STMP = 1585717814114L;
 
     /**
      * 每一部分占用的位数
@@ -101,7 +92,7 @@ public class SnowFlake {
         lastStmp = currStmp;
 
         //或运算，每个数左移后都转为二进制，然后从高位开始比较，两个数只要有一个为1则为1，否则就为0。
-        return (currStmp - START_STMP) << TIMESTMP_LEFT //时间戳部分
+        return (currStmp - RuntimeCfg.startstamp) << TIMESTMP_LEFT //时间戳部分
                 | datacenterId << DATACENTER_LEFT //数据中心部分
                 | machineId << MACHINE_LEFT //机器标识部分
                 | sequence; //序列号部分
