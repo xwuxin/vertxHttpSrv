@@ -16,6 +16,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
 /**
+ * handler基类
  * @author wangyucheng<2751072@qq.com>
  */
 public class BaseHttpHandler implements Handler<RoutingContext> {
