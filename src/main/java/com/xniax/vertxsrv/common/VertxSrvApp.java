@@ -1,5 +1,9 @@
 package com.xniax.vertxsrv.common;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +25,9 @@ public class VertxSrvApp extends AbstractVerticle {
 
     static {
         initLogger();
+        loadConfigure();
     }
+
     private static Logger logger;
 
     public static void main(String[] args) {
@@ -33,7 +39,11 @@ public class VertxSrvApp extends AbstractVerticle {
     @Override
     public void start() {
         try {
-            SnowFlakeIns.init(30, 20);
+            logger.info("RuntimeCfg.datacenterId:{}", RuntimeCfg.datacenterId);
+            logger.info("RuntimeCfg.machineId:{}", RuntimeCfg.machineId);
+           
+            // 机器位为datacenterId和machineId各占5位，总共10位可部署在2^10=1024台机器上，取值范围在0-31之间
+            SnowFlakeIns.init(RuntimeCfg.datacenterId, RuntimeCfg.machineId);
             // 创建HttpServer
             HttpServer server = vertx.createHttpServer();
             // 创建路由对象
@@ -43,7 +53,7 @@ public class VertxSrvApp extends AbstractVerticle {
             router.route("/index").handler(baseHandler);
             // 把请求交给路由处理
             server.requestHandler(router);
-            server.listen(8888);
+            server.listen(RuntimeCfg.port);
 
             logger.info("start server ok!....");
         } catch (Exception e) {
@@ -52,12 +62,17 @@ public class VertxSrvApp extends AbstractVerticle {
         }
     }
 
+    /**
+     * 初始化log
+     * 
+     * @author wangyucheng
+     */
     private static void initLogger() {
         if (null == System.getProperty("vertxsrv.home")) {
             System.setProperty("vertxsrv.home", System.getProperty("user.dir"));
         }
         String configFileStr = System.getProperty("vertxsrv.home") + "/config/logback.xml";
-        if (System.getProperty("vertxsrv.config") != null) {
+        if (null != System.getProperty("vertxsrv.config")) {
             configFileStr = System.getProperty("vertxsrv.config") + "/logback.xml";
         }
         System.getProperties().setProperty("log.home", "./");
@@ -73,6 +88,38 @@ public class VertxSrvApp extends AbstractVerticle {
             LoggerFactory.getLogger(VertxSrvApp.class).error(e.getMessage(), e);
         });
         logger = LoggerFactory.getLogger(VertxSrvApp.class);
+    }
+
+    /**
+     * 加载configure.properties
+     * 
+     * @author wangyucheng
+     */
+    private static void loadConfigure() {
+        /** 加载配置文件 */
+        String cfgPath = String.format("%s/config", (String) System.getProperty("vertxsrv.home"));
+        if (null != System.getProperty("vertxsrv.config")) {
+            cfgPath = System.getProperty("vertxsrv.config");
+        }
+        Properties pro = new Properties();
+        try {
+            FileInputStream in = new FileInputStream(cfgPath + "/configure.properties");
+            pro.load(in);
+            in.close();
+        } catch (IOException e) {
+            logger.error("configpath:{}", System.getProperty("user.dir"));
+            logger.error(e.getMessage(), e);
+        }
+
+        // 读取IP地址
+        final long datacenterId = Long.valueOf(pro.getProperty("vertxsrv.datacenterId"));
+        RuntimeCfg.datacenterId = datacenterId;
+
+        final long machineId = Long.valueOf(pro.getProperty("vertxsrv.machineId"));
+        RuntimeCfg.machineId = machineId;
+
+        final int port = Integer.valueOf(pro.getProperty("vertxsrv.port"));
+        RuntimeCfg.port = port;
     }
 
     @Override

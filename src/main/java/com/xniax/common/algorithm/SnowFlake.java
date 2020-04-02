@@ -1,5 +1,8 @@
 package com.xniax.common.algorithm;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * twitter的snowflake算法
  * 64位二进制协议格式： 0 - 41位时间戳 - 5位数据中心标识 - 5位机器标识 - 12位序列号
@@ -7,6 +10,8 @@ package com.xniax.common.algorithm;
  * @author wangyucheng
  */
 public class SnowFlake {
+
+    private static Logger logger = LoggerFactory.getLogger(SnowFlake.class);
 
     /**
      * 起始的时间戳，可以修改为服务第一次启动的时间
@@ -74,7 +79,7 @@ public class SnowFlake {
      * 
      * @return
      */
-    public synchronized long nextId() {
+    public long nextId() {
         long currStmp = getNewstmp();
         if (currStmp < lastStmp) {
             //时钟回拨了
