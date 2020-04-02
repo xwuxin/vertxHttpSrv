@@ -2,7 +2,9 @@
 
 基于vert.x实现的http server.
 
-内置一个发号器，采用SnowFlake算法，编号单调递增
+内置一个发号器，采用SnowFlake算法。
+
+编号单调递增,时间回拨会拒绝生成id。
 
 项目用maven构建
 

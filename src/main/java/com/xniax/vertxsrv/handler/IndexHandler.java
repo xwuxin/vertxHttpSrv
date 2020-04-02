@@ -18,7 +18,7 @@ import io.vertx.ext.web.RoutingContext;
 public class IndexHandler implements VLogicHandler {
 
     private Logger logger = LoggerFactory.getLogger(VertxSrvApp.class);
-    
+
     public JSONObject index(RoutingContext rc) {
         JSONObject ret = new JSONObject();
         ret.put("desc", "index");
@@ -27,8 +27,14 @@ public class IndexHandler implements VLogicHandler {
 
     public JSONObject snowflake(RoutingContext rc) {
         JSONObject ret = new JSONObject();
-        ret.put("id", SnowFlakeIns.getSnowFlake().nextId());
-        logger.info("id:{}",ret.getString("id"));
+        try {
+            ret.put("id", SnowFlakeIns.getSnowFlake().nextId());
+            //logger.info("id:{}", ret.getString("id"));
+        } catch (Exception e) {
+            logger.info(e.getMessage(), e);
+            ret.put("error","create id error");
+        }
+
         return ret;
     }
 }
